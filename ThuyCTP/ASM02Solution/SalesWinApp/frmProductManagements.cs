@@ -18,22 +18,20 @@ namespace SalesWinApp
             InitializeComponent();
         }
 
-        //-------------------------
-        //MainMenu
+
         public frmMain Main { get; set; }
 
-        //-------------------------
         IProductRepository ProductRepository = new ProductRepository();
-        //create a data source
+
         BindingSource Source;
-        //-------------------------
+
         private void frmProductManagement_Load(object sender, EventArgs e)
         {
             btnDelete.Enabled = false;
             dgvProductList.CellDoubleClick += dbvProductList_CellDoubleClick;
         }
 
-        //-------------------------
+
         private void dbvProductList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             frmProductDetails frmProductDetails = new frmProductDetails
@@ -46,12 +44,12 @@ namespace SalesWinApp
             if(frmProductDetails.ShowDialog() == DialogResult.OK)
             {
                 LoadProductList();
-                //set focus on updated product
+
                 Source.Position = Source.Position - 1;
             }
         }
 
-        //get product from double clicking on a row from data grid
+
         private Product GetProductObject()
         {
             Product product = null;
@@ -74,7 +72,6 @@ namespace SalesWinApp
             return product;
         } 
 
-        //used to clear all text from the txt boxes
         private void ClearText()
         {
             txtProductId.Text = string.Empty;
@@ -85,7 +82,7 @@ namespace SalesWinApp
             txtUnitInStock.Text = string.Empty;
         }
 
-        //used to load the data grid
+
         private void LoadProductList()
         {
             var products = ProductRepository.GetProducts();
@@ -143,12 +140,11 @@ namespace SalesWinApp
             if (frmProductDetails.ShowDialog() == DialogResult.OK)
             {
                 LoadProductList();
-                //set focus on updated product
+
                 Source.Position = Source.Position - 1;
             }
         }
 
-        //note: REVISE YOUR ******** EXCEPTION
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -159,7 +155,7 @@ namespace SalesWinApp
             }
             catch (Exception Ex)
             {
-                //exception message is replaced with this to hide the error
+
                 MessageBox.Show(Ex.Message, "Deleting product");
             }
         }

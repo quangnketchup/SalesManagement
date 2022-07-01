@@ -21,7 +21,7 @@ namespace SalesWinApp
         }
         //------------------------------
         public IProductRepository ProductRepository { get; set; }
-        public bool InsertOrUpdate { get; set; } //False: Insert, True: Update
+        public bool InsertOrUpdate { get; set; }
         public Product ProductInfo { get; set; }
         //------------------------------
 
@@ -29,9 +29,8 @@ namespace SalesWinApp
         {
             cboCategoryId.SelectedIndex = 0;
             txtProductId.Enabled = !InsertOrUpdate;
-            if(InsertOrUpdate == true) //update mode
+            if(InsertOrUpdate == true) 
             {
-                //Show product to perform updating
                 txtProductId.Text = ProductInfo.ProductId.ToString();
                 cboCategoryId.Text = ProductInfo.CategoryId.ToString();
                 txtProductName.Text = ProductInfo.ProductName.ToString();
@@ -41,7 +40,7 @@ namespace SalesWinApp
             }
         }
 
-        //------------------------------
+ 
         private void btnSave_Click(object sender, EventArgs e)
         {
             try{
