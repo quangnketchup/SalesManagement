@@ -12,6 +12,7 @@ namespace SalesWinApp
 {
     public partial class frmMemberManagements : Form
     {
+        public bool isAdmin { get; set; }
         public frmMemberManagements()
         {
             InitializeComponent();
