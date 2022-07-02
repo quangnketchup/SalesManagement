@@ -1,13 +1,20 @@
 ﻿using DataAccess.DataAccess;
+using DataAccess.DataProvider;
+using DataAccess.Repository;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DataAccess
 {
-    public class ProductDAO
+    public class ProductDAO : BaseDAL
     {
-        //Using Singleton Pattern
+        //-----------------------
+        //using singleton
         private static ProductDAO instance = null;
         private static readonly object instanceLock = new object();
         private ProductDAO() { }
@@ -26,121 +33,194 @@ namespace DataAccess
             }
         }
 
-        public IEnumerable<Product> GetProductList()
+        //-----------------------
+        public IEnumerable<Product> getProductList()
         {
-            var members = new List<Product>();
+            IDataReader dataReader = null;
+            string SQLSelect = "Select ProductId, CategoryId, ProductName, Weight, UnitPrice, UnitInStock from Product";
+            var products = new List<Product>();
             try
             {
-                using var context = new AssignmentContext();
-                members = context.Products.ToList();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-            return members;
-
-        }
-
-        public Product GetProductByID(int ProductID)
-        {
-            Product mem = null;
-            try
-            {
-                using var context = new AssignmentContext();
-                mem = context.Products.SingleOrDefault(c=>c.ProductId == ProductID);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-            return mem;
-        }
-
-        //-----------------------------------------------------------------
-        //Add a new member
-        public void AddNew(Product Product)
-        {
-            try
-            {
-                Product mem = GetProductByID(Product.ProductId);
-                if (mem == null)
+                dataReader = dataProvider.GetDataReader(SQLSelect, CommandType.Text, out connection);
+                while (dataReader.Read())
                 {
-                    using var context = new AssignmentContext();
-                    context.Products.Add(Product);
-                    context.SaveChanges();
+                    products.Add(new Product
+                    {
+                        ProductId = dataReader.GetInt32(0),
+                        CategoryId = dataReader.GetInt32(1),
+                        ProductName = dataReader.GetString(2),
+                        Weight = dataReader.GetString(3),
+                        UnitPrice = dataReader.GetDecimal(4),
+                        UnitsInStock = dataReader.GetInt32(5)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                dataReader.Close();
+                CloseConnection();
+            }
+            return products;
+        }
+
+
+        //-----------------------
+        public Product getProductByID(int ProductId)
+        {
+            Product product = null;
+            IDataReader dataReader = null;
+            string SQLSelect = "Select ProductId, CategoryId, ProductName, Weight, UnitPrice, UnitInStock from Product" +
+                " Where ProductId = @ProductId";
+            try
+            {
+                var param = dataProvider.CreateParameter("@ProductId", 4, ProductId, DbType.Int32);
+                dataReader = dataProvider.GetDataReader(SQLSelect, CommandType.Text, out connection, param);
+                if (dataReader.Read())
+                {
+                    product = new Product
+                    {
+                        ProductId = dataReader.GetInt32(0),
+                        CategoryId = dataReader.GetInt32(1),
+                        ProductName = dataReader.GetString(2),
+                        Weight = dataReader.GetString(3),
+                        UnitPrice = dataReader.GetDecimal(4),
+                        UnitsInStock = dataReader.GetInt32(5)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                dataReader.Close();
+                CloseConnection();
+            }
+            return product;
+        }
+
+        //-----------------------
+        public void addNewProduct(Product product)
+        {
+            try
+            {
+                Product pro = getProductByID(product.ProductId);
+                if (pro == null)
+                {
+                    String SQLInsert = "Insert Product values (@ProductId, @CategoryId, @ProductName, @Weight, @UnitPrice, @UnitInStock)";
+                    var parameters = new List<SqlParameter>();
+                    parameters.Add(dataProvider.CreateParameter("@ProductId", 4, product.ProductId, DbType.Int32));
+                    parameters.Add(dataProvider.CreateParameter("@CategoryId", 4, product.CategoryId, DbType.Int32));
+                    parameters.Add(dataProvider.CreateParameter("@ProductName", 50, product.ProductName, DbType.String));
+                    parameters.Add(dataProvider.CreateParameter("@Weight", 50, product.Weight, DbType.String));
+                    parameters.Add(dataProvider.CreateParameter("@UnitPrice", 50, product.UnitPrice, DbType.Decimal));
+                    parameters.Add(dataProvider.CreateParameter("@UnitInStock", 4, product.UnitsInStock, DbType.Int32));
+                    dataProvider.Insert(SQLInsert, CommandType.Text, parameters.ToArray());
                 }
                 else
                 {
-                    throw new Exception("The product is already exist.");
+                    throw new Exception("Product existed!!!");
                 }
+
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new Exception(e.Message);
+                throw new Exception(ex.Message);
             }
-        }
-        //-----------------------------------------------------------------
-        //Add a new member
-        public void Update(Product Product)
-        {
-            try
+            finally
             {
-                Product mem = GetProductByID(Product.ProductId);
-                if (mem != null)
-                {
-                    using var context = new AssignmentContext();
-                    context.Products.Update(Product);
-                    context.SaveChanges();
-                }
-                else
-                {
-                    throw new Exception("The product does not already exist.");
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
+                CloseConnection();
             }
         }
 
-        //-----------------------------------------------------------------
-        //Add a new member
-        public void Remove(int ProductId)
+        //-----------------------
+        public void updateProduct(Product product)
         {
             try
             {
-                Product mem = GetProductByID(ProductId);
-                if (mem != null)
+                Product pro = getProductByID(product.ProductId);
+                if (pro != null)
                 {
-                    using var context = new AssignmentContext();
-                    context.Products.Remove(mem);
-                    context.SaveChanges();
+                    String SQLInsert = "Update Product set CategoryId= @CategoryId, ProductName = @ProductName," +
+                        " Weight =@Weight, UnitPrice = @UnitPrice, UnitInStock = @UnitInStock  where ProductId = @ProductId";
+                    var parameters = new List<SqlParameter>();
+                    parameters.Add(dataProvider.CreateParameter("@ProductId", 4, product.ProductId, DbType.Int32));
+                    parameters.Add(dataProvider.CreateParameter("@CategoryId", 4, product.CategoryId, DbType.Int32));
+                    parameters.Add(dataProvider.CreateParameter("@ProductName", 50, product.ProductName, DbType.String));
+                    parameters.Add(dataProvider.CreateParameter("@Weight", 50, product.Weight, DbType.String));
+                    parameters.Add(dataProvider.CreateParameter("@UnitPrice", 50, product.UnitPrice, DbType.Decimal));
+                    parameters.Add(dataProvider.CreateParameter("@UnitInStock", 4, product.UnitsInStock, DbType.Int32));
+                    dataProvider.Update(SQLInsert, CommandType.Text, parameters.ToArray());
                 }
                 else
                 {
-                    throw new Exception("The product does not already exist.");
+                    throw new Exception("No Product existed!!!");
                 }
+
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new Exception(e.Message);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                CloseConnection();
             }
         }
-        public List<Product> Filter(int a, int b)
+
+        //-------------------------God help me
+        public void removeProduct(int productId)
         {
-            var members = new List<Product>();
             try
             {
-                using var context = new AssignmentContext();
-                members = context.Products.ToList();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-            return members;
+                IOrderDetailRepository OrderDetailRepository = new OrderDetailRepository();
+                var orderDetails = OrderDetailRepository.GetOrderDetailByProductId(productId);
+                if (orderDetails.Count() == 0)
+                {
+                    String SQLInsert = "Delete Product where ProductId = @ProductId";
+                    var param = dataProvider.CreateParameter("@ProductId", 4, productId, DbType.Int32);
+                    dataProvider.Delete(SQLInsert, CommandType.Text, param);
+                }
+                else
+                {
+                    throw new Exception("Product is in use!!!");
+                }
 
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                CloseConnection();
+            }
+        }
+
+        //filter the product list
+        public List<Product> GetFilteredProduct(String tag)
+        {
+            List<Product> filtered = new List<Product>();
+            foreach (Product product in getProductList())
+            {
+                int add = 0;
+                if (product.ProductId.ToString().Contains(tag))
+                    add = 1;
+                if (product.ProductName.Contains(tag))
+                    add = 1;
+                if (product.UnitPrice.ToString().Contains(tag))
+                    add = 1;
+                if (product.UnitsInStock.ToString().Contains(tag))
+                    add = 1;
+                if (add == 1)
+                    filtered.Add(product);
+            }
+            return filtered;
         }
     }
 }
