@@ -51,7 +51,7 @@ namespace DataAccess
                         ProductName = dataReader.GetString(2),
                         Weight = dataReader.GetString(3),
                         UnitPrice = dataReader.GetDecimal(4),
-                        UnitsInStock = dataReader.GetInt32(5)
+                        UnitslnStock = dataReader.GetInt32(5)
                     });
                 }
             }
@@ -88,7 +88,7 @@ namespace DataAccess
                         ProductName = dataReader.GetString(2),
                         Weight = dataReader.GetString(3),
                         UnitPrice = dataReader.GetDecimal(4),
-                        UnitsInStock = dataReader.GetInt32(5)
+                        UnitslnStock = dataReader.GetInt32(5)
                     };
                 }
             }
@@ -119,7 +119,7 @@ namespace DataAccess
                     parameters.Add(dataProvider.CreateParameter("@ProductName", 50, product.ProductName, DbType.String));
                     parameters.Add(dataProvider.CreateParameter("@Weight", 50, product.Weight, DbType.String));
                     parameters.Add(dataProvider.CreateParameter("@UnitPrice", 50, product.UnitPrice, DbType.Decimal));
-                    parameters.Add(dataProvider.CreateParameter("@UnitInStock", 4, product.UnitsInStock, DbType.Int32));
+                    parameters.Add(dataProvider.CreateParameter("@UnitInStock", 4, product.UnitslnStock, DbType.Int32));
                     dataProvider.Insert(SQLInsert, CommandType.Text, parameters.ToArray());
                 }
                 else
@@ -154,7 +154,7 @@ namespace DataAccess
                     parameters.Add(dataProvider.CreateParameter("@ProductName", 50, product.ProductName, DbType.String));
                     parameters.Add(dataProvider.CreateParameter("@Weight", 50, product.Weight, DbType.String));
                     parameters.Add(dataProvider.CreateParameter("@UnitPrice", 50, product.UnitPrice, DbType.Decimal));
-                    parameters.Add(dataProvider.CreateParameter("@UnitInStock", 4, product.UnitsInStock, DbType.Int32));
+                    parameters.Add(dataProvider.CreateParameter("@UnitInStock", 4, product.UnitslnStock, DbType.Int32));
                     dataProvider.Update(SQLInsert, CommandType.Text, parameters.ToArray());
                 }
                 else
@@ -215,7 +215,7 @@ namespace DataAccess
                     add = 1;
                 if (product.UnitPrice.ToString().Contains(tag))
                     add = 1;
-                if (product.UnitsInStock.ToString().Contains(tag))
+                if (product.UnitslnStock.ToString().Contains(tag))
                     add = 1;
                 if (add == 1)
                     filtered.Add(product);

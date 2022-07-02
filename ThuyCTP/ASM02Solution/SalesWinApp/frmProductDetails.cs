@@ -36,7 +36,7 @@ namespace SalesWinApp
                 txtProductName.Text = ProductInfo.ProductName.ToString();
                 txtWeight.Text = ProductInfo.Weight.ToString();
                 txtUnitPrice.Text = ProductInfo.UnitPrice.ToString("0#");
-                txtUnitInStock.Text = ProductInfo.UnitsInStock.ToString();
+                txtUnitInStock.Text = ProductInfo.UnitslnStock.ToString();
             }
         }
 
@@ -51,7 +51,7 @@ namespace SalesWinApp
                     ProductName = txtProductName.Text,
                     Weight = txtWeight.Text,
                     UnitPrice = Convert.ToInt32(txtUnitPrice.Text),
-                    UnitsInStock = Convert.ToInt32(txtUnitInStock.Text)
+                    UnitslnStock = Convert.ToInt32(txtUnitInStock.Text)
                 };
 
                 if(InsertOrUpdate == false)
